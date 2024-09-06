@@ -1,0 +1,76 @@
+body {
+    margin: 0;
+}
+
+.navbar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 60px;
+}
+
+li {
+    float: right;
+}
+
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-family: Oswald;
+    font-size: 18px;
+}
+
+.heading {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-family: "Bebas Neue";
+    font-size: 30px;
+}
+
+li a:hover {
+    background-color: #34aa73;
+    height: 60px;
+}
+
+.active {
+    background-color: #0a8659;
+    height: 60px;
+}
+
+.result-image img {
+    width: 100%;
+    height: 600px;
+}
+
+.noticeboard {
+    margin: auto;
+    width: 50%;
+    border-radius: 10px;
+    background-color: rgb(212, 222, 231);
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.text {
+    padding: 10px;
+}
+
+h1 {
+    text-align: center;
+    font-family: Merriweather;
+}
+
+p {
+    font-family: Merriweather;
+}
