@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Student Result Management</title>
+        <link rel="stylesheet" href="admin-login.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Tint&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+        <script type="text/javascript" src="admin-login.js"></script>
+    </head>
+    <body> 
+        <h1> ADMIN LOGIN </h1>
+        <form action="action_page.php" method="post">
+            <div class="container">
+                <label for="psw"><b>Enter Password</b></label>
+                <input type="password" placeholder="Enter Password" name="psw" required>
+                <input type="button" onclick="check(this.form)" value="Login">
+                
+            </div>
+            <div class="container" style="background-color:#f1f1f1">
+                <button type="button" class="cancelbtn"><a href="index.html">Cancel</a></button>
+            </div>
+        </form>        
+    </body> 
+</html>
