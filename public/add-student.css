@@ -38,9 +38,10 @@ input[type=date] {
   box-sizing: border-box;
 }
 
-.addStudent {
-    width: 15%;
+.button-container button{
+    width: 25%;
     margin: 20px;
+    display: block;
 }
 
 button {

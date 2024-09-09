@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Modify Student Details</title>
     <link rel="stylesheet" href="add-student.css">
 </head>
 <body>     
@@ -28,8 +28,12 @@
             <a href="#" class="logout">Logout</a>
         </header>
 
-        <button class="addStudent" onclick="document.getElementById('addStudentModal').style.display='block'">ADD STUDENT</button>
-        <button class="modifyStudent" onclick="document.getElementById('modifyStudentModal').style.display='block'">MODIFY STUDENT DETAILS</button>
+        <div class="button-container">
+            <button class="addStudent" onclick="document.getElementById('addStudentModal').style.display='block'">ADD STUDENT</button>
+            <button class="modifyStudent" onclick="document.getElementById('modifyStudentModal').style.display='block'">MODIFY STUDENT DETAILS</button>
+            <button class="viewStudent" onclick="document.getElementById('viewResultModal').style.display='block'">VIEW STUDENT DETAILS</button>
+            <button class="deleteStudent" onclick="document.getElementById('deleteStudentModal').style.display='block'">DELETE STUDENT</button>
+        </div>
 
         <!-- Add Student Modal -->
         <div id="addStudentModal" class="modal">
@@ -97,18 +101,41 @@
             </form>
         </div>
 
-        <!-- View Student Form -->
-        <form action="/view" method="GET">
-            <fieldset>
-                <h3>View a student</h3>
-                <label for="rollNoView">Roll Number</label>
-                <input type="text" id="rollNoView" name="rollNo" required>
-                <br><br>
-                <button type="submit">Submit</button>
-                <br><br><br>
-            </fieldset>
-        </form>
+        <!-- View Student Result Modal -->
+        <div id="viewResultModal" class="modal">
+            <span onclick="document.getElementById('viewResultModal').style.display='none'" class="close" title="Close Modal">&times;</span>
+            <form action="/view" method="GET" class="modal-content animate">
+                <fieldset>
+                    <div class="container">
+                        <label for="rollNoViewResult"><b>Roll Number: </b></label>
+                        <input type="text" id="rollNoViewResult" name="rollNo" placeholder="Roll Number" required>
+                        
+                        <button type="submit">View Student Details</button>
+                    </div>
+                    <div class="container" style="background-color:#f1f1f1">
+                        <button type="button" onclick="document.getElementById('viewResultModal').style.display='none'" class="cancelbtn">Cancel</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+        <div id="deleteStudentModal" class="modal">
+          <span onclick="document.getElementById('deleteStudentModal').style.display='none'" class="close" title="Close Modal">&times;</span>
+          <form action="/delete" method="POST" class="modal-content animate">
+              <fieldset>
+                  <div class="container">
+                      <label for="rollNoViewResult"><b>Roll Number: </b></label>
+                      <input type="text" id="rollNoViewResult" name="rollNo" placeholder="Roll Number" required>
+                      
+                      <button type="submit">Delete Student</button>
+                  </div>
+                  <div class="container" style="background-color:#f1f1f1">
+                      <button type="button" onclick="document.getElementById('viewResultModal').style.display='none'" class="cancelbtn">Cancel</button>
+                  </div>
+              </fieldset>
+          </form>
+      </div>
     </div>
+
+    <script type="text/javascript" src="add-student.js"></script>
 </body>
-<script type="text/javascript" src="add-student.js"></script>
 </html>
