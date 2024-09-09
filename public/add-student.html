@@ -31,18 +31,16 @@
         <div class="button-container">
             <button class="addStudent" onclick="document.getElementById('addStudentModal').style.display='block'">ADD STUDENT</button>
             <button class="modifyStudent" onclick="document.getElementById('modifyStudentModal').style.display='block'">MODIFY STUDENT DETAILS</button>
-            <button class="viewStudent" onclick="document.getElementById('viewResultModal').style.display='block'">VIEW STUDENT DETAILS</button>
             <button class="deleteStudent" onclick="document.getElementById('deleteStudentModal').style.display='block'">DELETE STUDENT</button>
         </div>
 
-        <!-- Add Student Modal -->
         <div id="addStudentModal" class="modal">
             <span onclick="document.getElementById('addStudentModal').style.display='none'" class="close" title="Close Modal">&times;</span>
-            <form action="/add" method="POST" class="modal-content animate">
+            <form id="addStudentForm" class="modal-content animate">
                 <fieldset>
                     <div class="container">
                         <label for="sname"><b>Name of the Student: </b></label>
-                        <input type="text" placeholder="Name of the student" name="sname" required>
+                        <input type="text" id="sname" name="sname" placeholder="Name of the student" required>
 
                         <label for="class"><b>Class: </b></label>
                         <input class="class" list="class" name="class" placeholder="Class">
@@ -54,10 +52,10 @@
                         </datalist>
 
                         <label for="rollNo"><b>Roll no.: </b></label>
-                        <input type="number" placeholder="Roll no. of the student" name="rollNo" required>
+                        <input type="number" id="rollNo" name="rollNo" placeholder="Roll no. of the student" required>
 
                         <label for="birthDate"><b>Date of birth: </b></label>
-                        <input type="date" name="birthDate" required>
+                        <input type="date" id="birthDate" name="birthDate" required>
 
                         <button type="submit">Add</button>
                     </div>
@@ -66,12 +64,12 @@
                     </div>
                 </fieldset>
             </form>
+            <div id="addStudentResponse"></div>
         </div>
 
-        <!-- Modify Student Details Modal -->
         <div id="modifyStudentModal" class="modal">
             <span onclick="document.getElementById('modifyStudentModal').style.display='none'" class="close" title="Close Modal">&times;</span>
-            <form action="/modify" method="POST" class="modal-content animate">
+            <form id="modifyStudentForm" class="modal-content animate">
                 <fieldset>
                     <div class="container">
                         <label for="rollNoModify"><b>Roll Number: </b></label>
@@ -99,42 +97,26 @@
                     </div>
                 </fieldset>
             </form>
+            <div id="modifyStudentResponse"></div>
         </div>
 
-        <!-- View Student Result Modal -->
-        <div id="viewResultModal" class="modal">
-            <span onclick="document.getElementById('viewResultModal').style.display='none'" class="close" title="Close Modal">&times;</span>
-            <form action="/view" method="GET" class="modal-content animate">
+        <div id="deleteStudentModal" class="modal">
+            <span onclick="document.getElementById('deleteStudentModal').style.display='none'" class="close" title="Close Modal">&times;</span>
+            <form id="deleteStudentForm" class="modal-content animate">
                 <fieldset>
                     <div class="container">
-                        <label for="rollNoViewResult"><b>Roll Number: </b></label>
-                        <input type="text" id="rollNoViewResult" name="rollNo" placeholder="Roll Number" required>
-                        
-                        <button type="submit">View Student Details</button>
+                        <label for="rollNoDelete"><b>Roll Number: </b></label>
+                        <input type="text" id="rollNoDelete" name="rollNo" placeholder="Roll Number" required>
+
+                        <button type="submit">Delete Student</button>
                     </div>
                     <div class="container" style="background-color:#f1f1f1">
-                        <button type="button" onclick="document.getElementById('viewResultModal').style.display='none'" class="cancelbtn">Cancel</button>
+                        <button type="button" onclick="document.getElementById('deleteStudentModal').style.display='none'" class="cancelbtn">Cancel</button>
                     </div>
                 </fieldset>
             </form>
+            <div id="deleteStudentResponse"></div>
         </div>
-        <div id="deleteStudentModal" class="modal">
-          <span onclick="document.getElementById('deleteStudentModal').style.display='none'" class="close" title="Close Modal">&times;</span>
-          <form action="/delete" method="POST" class="modal-content animate">
-              <fieldset>
-                  <div class="container">
-                      <label for="rollNoViewResult"><b>Roll Number: </b></label>
-                      <input type="text" id="rollNoViewResult" name="rollNo" placeholder="Roll Number" required>
-                      
-                      <button type="submit">Delete Student</button>
-                  </div>
-                  <div class="container" style="background-color:#f1f1f1">
-                      <button type="button" onclick="document.getElementById('viewResultModal').style.display='none'" class="cancelbtn">Cancel</button>
-                  </div>
-              </fieldset>
-          </form>
-      </div>
-    </div>
 
     <script type="text/javascript" src="add-student.js"></script>
 </body>
