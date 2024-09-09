@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="add-student.css">
+</head>
+<body>     
+    <div class="sidebar">
+        <div class="logo">SRMS | Admin</div>
+        <nav class="dash">
+            <ul>
+                <li><a href="#">Dashboard</a></li>   
+                <li><a href="#">Student Classes</a></li>
+                <li><a href="#">Subjects</a></li>
+                <li><a href="#">Students</a></li>
+                <li><a href="#">Result</a></li>
+                <li><a href="#">Notices</a></li>
+                <li><a href="#">Admin Change Password</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <header class="header">
+            <h2>Modify Student List</h2>
+            <a href="#" class="logout">Logout</a>
+        </header>
+
+        <button class="addStudent" onclick="document.getElementById('addStudentModal').style.display='block'">ADD STUDENT</button>
+        <button class="modifyStudent" onclick="document.getElementById('modifyStudentModal').style.display='block'">MODIFY STUDENT DETAILS</button>
+
+        <!-- Add Student Modal -->
+        <div id="addStudentModal" class="modal">
+            <span onclick="document.getElementById('addStudentModal').style.display='none'" class="close" title="Close Modal">&times;</span>
+            <form action="/add" method="POST" class="modal-content animate">
+                <fieldset>
+                    <div class="container">
+                        <label for="sname"><b>Name of the Student: </b></label>
+                        <input type="text" placeholder="Name of the student" name="sname" required>
+
+                        <label for="class"><b>Class: </b></label>
+                        <input class="class" list="class" name="class" placeholder="Class">
+                        <datalist id="class">
+                            <option value="First Year">
+                            <option value="Second Year">
+                            <option value="Third Year">
+                            <option value="Fourth Year">
+                        </datalist>
+
+                        <label for="rollNo"><b>Roll no.: </b></label>
+                        <input type="number" placeholder="Roll no. of the student" name="rollNo" required>
+
+                        <label for="birthDate"><b>Date of birth: </b></label>
+                        <input type="date" name="birthDate" required>
+
+                        <button type="submit">Add</button>
+                    </div>
+                    <div class="container" style="background-color:#f1f1f1">
+                        <button type="button" onclick="document.getElementById('addStudentModal').style.display='none'" class="cancelbtn">Cancel</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+
+        <!-- Modify Student Details Modal -->
+        <div id="modifyStudentModal" class="modal">
+            <span onclick="document.getElementById('modifyStudentModal').style.display='none'" class="close" title="Close Modal">&times;</span>
+            <form action="/modify" method="POST" class="modal-content animate">
+                <fieldset>
+                    <div class="container">
+                        <label for="rollNoModify"><b>Roll Number: </b></label>
+                        <input type="text" id="rollNoModify" name="rollNo" placeholder="Roll Number" required>
+
+                        <label for="snameModify"><b>Name of the Student: </b></label>
+                        <input type="text" id="snameModify" name="sname" placeholder="Name of the student">
+
+                        <label for="classModify"><b>Class: </b></label>
+                        <input class="class" list="classModify" name="class" placeholder="Class">
+                        <datalist id="classModify">
+                            <option value="First Year">
+                            <option value="Second Year">
+                            <option value="Third Year">
+                            <option value="Fourth Year">
+                        </datalist>
+
+                        <label for="birthDateModify"><b>Date of birth: </b></label>
+                        <input type="date" id="birthDateModify" name="birthDate">
+
+                        <button type="submit">Modify</button>
+                    </div>
+                    <div class="container" style="background-color:#f1f1f1">
+                        <button type="button" onclick="document.getElementById('modifyStudentModal').style.display='none'" class="cancelbtn">Cancel</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+
+        <!-- View Student Form -->
+        <form action="/view" method="GET">
+            <fieldset>
+                <h3>View a student</h3>
+                <label for="rollNoView">Roll Number</label>
+                <input type="text" id="rollNoView" name="rollNo" required>
+                <br><br>
+                <button type="submit">Submit</button>
+                <br><br><br>
+            </fieldset>
+        </form>
+    </div>
+</body>
+<script type="text/javascript" src="add-student.js"></script>
+</html>

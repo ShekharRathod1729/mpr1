@@ -1,0 +1,29 @@
+{
+  "name": "mpr",
+  "version": "1.0.0",
+  "description": "student result management system",
+  "main": "admin-login.js",
+  "scripts": {
+    "test": "karma"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShekharRathod1729/mpr1.git"
+  },
+  "keywords": [
+    "mpr"
+  ],
+  "author": "Shekhar Rathod",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ShekharRathod1729/mpr1/issues"
+  },
+  "homepage": "https://github.com/ShekharRathod1729/mpr1#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "sqlite3": "^5.1.7"
+  }
+}
