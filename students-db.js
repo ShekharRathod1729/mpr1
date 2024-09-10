@@ -12,6 +12,7 @@ const server = http.createServer(app);
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
+    message: "Too many requests, please try again later."
 });
 
 const db = new sqlite3.Database('./database/students.db', (err) => {
@@ -159,60 +160,16 @@ app.get('/students', (req, res) => {
     });
 });
 
-// Add this to your existing routes in index.js
-
-// Create a table for student marks
-db.run('CREATE TABLE IF NOT EXISTS marks (rollNo TEXT, subject TEXT, marks INTEGER, FOREIGN KEY(rollNo) REFERENCES student(rollNo))', (err) => {
-    if (err) {
-        console.error('Error creating marks table:', err.message);
-    }
-});
-
-// Route to add marks
-app.post('/add-marks', (req, res) => {
-    const { rollNo, subject, marks } = req.body;
-
-    if (!rollNo || !subject || marks === undefined) {
-        return res.status(400).send("All fields are required.");
-    }
-
-    db.run('INSERT INTO marks (rollNo, subject, marks) VALUES (?, ?, ?)', 
-        [rollNo, subject, marks], 
-        function (err) {
-            if (err) {
-                console.error('Error inserting marks:', err.message);
-                return res.status(500).send("Error adding marks.");
-            }
-            res.send(`Marks added for Roll No. = ${rollNo}, Subject = ${subject}, Marks = ${marks}`);
+process.on('SIGINT', () => {
+    db.close((err) => {
+        if (err) {
+            console.error('Error closing database:', err.message);
+        } else {
+            console.log('Database connection closed.');
         }
-    );
+        process.exit(0);
+    });
 });
-
-// Route to get marks for a student
-app.get('/get-marks', (req, res) => {
-    const { rollNo } = req.query;
-
-    if (!rollNo) {
-        return res.status(400).send("Roll number is required.");
-    }
-
-    db.all('SELECT subject, marks FROM marks WHERE rollNo = ?', 
-        [rollNo], 
-        (err, rows) => {
-            if (err) {
-                console.error('Error retrieving marks:', err.message);
-                return res.status(500).send("Error retrieving marks.");
-            }
-
-            if (rows.length > 0) {
-                res.json(rows);
-            } else {
-                res.send("No marks found for the provided roll number.");
-            }
-        }
-    );
-});
-
 
 server.listen(3000, () => {
     console.log("Server listening on port 3000");
