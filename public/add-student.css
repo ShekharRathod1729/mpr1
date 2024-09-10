@@ -209,3 +209,48 @@ label {
     display: block;
 }
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+button {
+  padding: 5px 10px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.modify-btn {
+  background-color: #4CAF50; /* Green */
+  width: 50%;
+  margin: auto;
+}
+
+.delete-btn {
+  background-color: #f44336; /* Red */
+  width: 50%;
+  margin: auto;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.addStudent {
+  height: 40px;
+}

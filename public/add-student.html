@@ -15,7 +15,7 @@
                 <li><a href="#">Student Classes</a></li>
                 <li><a href="#">Subjects</a></li>
                 <li><a href="#">Students</a></li>
-                <li><a href="#">Result</a></li>
+                <li><a href="modify-result.html">Result</a></li>
                 <li><a href="#">Notices</a></li>
                 <li><a href="#">Admin Change Password</a></li>
             </ul>
@@ -25,14 +25,14 @@
     <div class="main-content">
         <header class="header">
             <h2>Modify Student List</h2>
-            <a href="#" class="logout">Logout</a>
+            <a href="index.html" class="logout">Logout</a>
         </header>
 
         <div class="button-container">
             <button class="addStudent" onclick="document.getElementById('addStudentModal').style.display='block'">ADD STUDENT</button>
-            <button class="modifyStudent" onclick="document.getElementById('modifyStudentModal').style.display='block'">MODIFY STUDENT DETAILS</button>
-            <button class="deleteStudent" onclick="document.getElementById('deleteStudentModal').style.display='block'">DELETE STUDENT</button>
         </div>
+
+        <div id="studentListContainer"></div>
 
         <div id="addStudentModal" class="modal">
             <span onclick="document.getElementById('addStudentModal').style.display='none'" class="close" title="Close Modal">&times;</span>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify Result</title>
+    <link rel="stylesheet" href="modify-result.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">SRMS | Admin</div>
+        <ul class="dash">
+            <li><a href="#">Dashboard</a></li>   
+            <li><a href="#">Student Classes</a></li>
+            <li><a href="#">Subjects</a></li>
+            <li><a href="add-student.html">Students</a></li>
+            <li><a href="modify-result.html">Result</a></li>
+            <li><a href="#">Notices</a></li>
+            <li><a href="#">Admin Change Password</a></li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <h1>Enter Student Marks</h1>
+        <table id="studentsTable">
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    
+    <!-- Modal for Add/Modify Marks -->
+    <div id="marksModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Enter/Modify Marks</h2>
+            <form id="modalForm">
+                <div id="modalFormFields"></div>
+                <button type="submit">Submit Marks</button>
+            </form>
+            <div id="modalResponse"></div>
+        </div>
+    </div>
+
+    <script src="modify-result.js"></script>
+</body>
+</html>
