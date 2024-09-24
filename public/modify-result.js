@@ -6,20 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalFormFields = document.getElementById('modalFormFields');
     const modalResponse = document.getElementById('modalResponse');
 
-    // Debugging: Check if elements are correctly selected
-    console.log('studentsTable:', studentsTable);
-    console.log('marksModal:', marksModal);
-    console.log('closeButton:', closeButton);
-    console.log('modalForm:', modalForm);
-    console.log('modalFormFields:', modalFormFields);
-    console.log('modalResponse:', modalResponse);
-
-    if (!studentsTable || !marksModal || !closeButton || !modalForm || !modalFormFields || !modalResponse) {
-        console.error('One or more required elements are missing in the HTML.');
-        return;
-    }
-
-    // Define the subjects for each year
     const subjects = {
         'First Year': [
             'Engineering Mathematics-I',
@@ -51,48 +37,69 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    let studentsByClass = {}; // Store student data including their year
+    let studentsByClass = {};
 
-    // Function to populate the table based on student data
     function populateTable(students) {
         const tableBody = studentsTable.querySelector('tbody');
         if (students.length) {
             tableBody.innerHTML = students.map(student => `
-                <tr>
-                    <td>${student.rollNo}</td>
-                    <td>${student.sname}</td>
-                    <td><button data-rollno="${student.rollNo}" class="add-modify-btn">Add/Modify</button></td>
-                </tr>
+            <tr>
+                <td>${student.rollNo}</td>
+                <td>${student.sname}</td>
+                <td><button data-rollno="${student.rollNo}" class="add-modify-btn">Add/Modify</button></td>
+            </tr>
             `).join('');
         } else {
             tableBody.innerHTML = '<tr><td colspan="3">No students found</td></tr>';
         }
     }
 
-    // Function to show modal and set up the form fields
     function showModal(rollNo) {
         modalFormFields.innerHTML = ''; // Clear previous fields
         const student = Object.values(studentsByClass).flat().find(student => student.rollNo === rollNo);
-        const studentYear = student ? student.year : null;
-        if (studentYear && subjects[studentYear]) {
-            modalFormFields.innerHTML = subjects[studentYear].map(subject => `
+
+        if (student) {
+            const studentYear = student.class; 
+            if (subjects[studentYear]) {
+                modalFormFields.innerHTML = subjects[studentYear].map(subject => `
                 <div>
                     <label>${subject}</label>
-                    <input type="number" name="${subject}" placeholder="Enter marks" min="0">
+                    <input type="number" name="${subject}" placeholder="Enter marks" min="0" max="100">
                 </div>
-            `).join('');
+                `).join('');
+            } else {
+                modalFormFields.innerHTML = '<p>Unable to determine student year.</p>';
+            }
+
+            // Fetch and display existing marks
+            fetch(`/marks?rollNo=${rollNo}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(marks => {
+                    marks.forEach(mark => {
+                        const inputField = modalFormFields.querySelector(`input[name="${mark.subject}"]`);
+                        if (inputField) {
+                            inputField.value = mark.marks;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching marks:', error);
+                    modalResponse.innerText = 'Error fetching marks.';
+                });
+
+            marksModal.style.display = 'block';
         } else {
-            modalFormFields.innerHTML = '<p>Unable to determine student year.</p>';
+            modalFormFields.innerHTML = '<p>Unable to find student data.</p>';
         }
-        marksModal.style.display = 'block';
     }
 
-    // Close modal
     closeButton.addEventListener('click', () => {
         marksModal.style.display = 'none';
     });
 
-    // Handle form submission in modal
     modalForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const formData = new FormData(modalForm);
@@ -121,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event delegation to handle Add/Modify button clicks
     studentsTable.addEventListener('click', (event) => {
         if (event.target && event.target.classList.contains('add-modify-btn')) {
             const rollNo = event.target.getAttribute('data-rollno');
@@ -129,12 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Fetch and populate student data
     fetch('/students')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
         .then(data => {
             studentsByClass = data;
-            console.log('Fetched student data:', studentsByClass); // Log fetched data
             const students = [];
             Object.values(studentsByClass).forEach(classStudents => {
                 students.push(...classStudents);

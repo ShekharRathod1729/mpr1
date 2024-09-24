@@ -28,16 +28,15 @@ app.use(express.static(path.join(__dirname, './public')));
 app.use(helmet());
 app.use(limiter);
 
-db.run('CREATE TABLE IF NOT EXISTS student (sname TEXT, class TEXT, rollNo TEXT PRIMARY KEY, birthDate TEXT)', (err) => {
-    if (err) {
-        console.error('Error creating table:', err.message);
-    }
-});
+// Create tables if they do not exist
+db.run('CREATE TABLE IF NOT EXISTS student (sname TEXT, class TEXT, rollNo TEXT PRIMARY KEY, birthDate TEXT)');
+db.run('CREATE TABLE IF NOT EXISTS marks (rollNo TEXT, subject TEXT, marks INTEGER, FOREIGN KEY(rollNo) REFERENCES student(rollNo))');
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, './public/add-student.html'));
 });
 
+// Add student
 app.post('/add', (req, res) => {
     const { sname, class: studentClass, rollNo, birthDate } = req.body;
 
@@ -45,18 +44,19 @@ app.post('/add', (req, res) => {
         return res.status(400).send("All fields are required.");
     }
 
-    db.run('INSERT INTO student (sname, class, rollNo, birthDate) VALUES (?, ?, ?, ?)', 
-        [sname, studentClass, rollNo, birthDate], 
-        function (err) {
-            if (err) {
-                console.error('Error inserting student:', err.message);
-                return res.status(500).send("Error adding student.");
-            }
-            res.send(`New student added with Roll no. = ${rollNo}, Name = ${sname}, Class = ${studentClass}, Date of Birth = ${birthDate}`);
-        }
+    db.run('INSERT INTO student (sname, class, rollNo, birthDate) VALUES (?, ?, ?, ?)',
+           [sname, studentClass, rollNo, birthDate],
+           function (err) {
+               if (err) {
+                   console.error('Error inserting student:', err.message);
+                   return res.status(500).send("Error adding student.");
+               }
+               res.send(`New student added with Roll no. = ${rollNo}, Name = ${sname}, Class = ${studentClass}, Date of Birth = ${birthDate}`);
+           }
     );
 });
 
+// View student details
 app.get('/view', (req, res) => {
     const { rollNo } = req.query;
 
@@ -64,23 +64,24 @@ app.get('/view', (req, res) => {
         return res.status(400).send("Roll number is required.");
     }
 
-    db.get('SELECT rollNo AS ROLLNO, class AS CLASS, sname AS SNAME, birthDate AS BIRTHDATE FROM student WHERE rollNo = ?', 
-        [rollNo], 
-        (err, row) => {
-            if (err) {
-                console.error('Error retrieving student details:', err.message);
-                return res.status(500).send("Error retrieving student details.");
-            }
+    db.get('SELECT rollNo AS ROLLNO, class AS CLASS, sname AS SNAME, birthDate AS BIRTHDATE FROM student WHERE rollNo = ?',
+           [rollNo],
+           (err, row) => {
+               if (err) {
+                   console.error('Error retrieving student details:', err.message);
+                   return res.status(500).send("Error retrieving student details.");
+               }
 
-            if (row) {
-                res.send(`ID: ${row.ROLLNO}\nName: ${row.SNAME}\nClass: ${row.CLASS}\nDate of Birth: ${row.BIRTHDATE}`);
-            } else {
-                res.send("No student found with the provided roll number.");
-            }
-        }
+               if (row) {
+                   res.send(`ID: ${row.ROLLNO}\nName: ${row.SNAME}\nClass: ${row.CLASS}\nDate of Birth: ${row.BIRTHDATE}`);
+               } else {
+                   res.send("No student found with the provided roll number.");
+               }
+           }
     );
 });
 
+// Modify student details
 app.post('/modify', (req, res) => {
     const { rollNo, sname, class: studentClass, birthDate } = req.body;
 
@@ -103,6 +104,7 @@ app.post('/modify', (req, res) => {
     });
 });
 
+// Delete student
 app.post('/delete', (req, res) => {
     const { rollNo } = req.body;
 
@@ -124,6 +126,7 @@ app.post('/delete', (req, res) => {
     });
 });
 
+// Close the database connection
 app.get('/close', (req, res) => {
     db.close((err) => {
         if (err) {
@@ -136,6 +139,7 @@ app.get('/close', (req, res) => {
     });
 });
 
+// Get all students
 app.get('/students', (req, res) => {
     const studentsByClass = {};
 
@@ -152,7 +156,8 @@ app.get('/students', (req, res) => {
             studentsByClass[row.class].push({
                 sname: row.sname,
                 rollNo: row.rollNo,
-                birthDate: row.birthDate
+                birthDate: row.birthDate,
+                class: row.class // Include the class property
             });
         });
 
@@ -160,6 +165,50 @@ app.get('/students', (req, res) => {
     });
 });
 
+// Add marks for a student
+app.post('/add-marks', (req, res) => {
+    const marksEntries = req.body; // All marks entries from the form
+
+    const insertMarksPromises = Object.entries(marksEntries).map(([subject, marks]) => {
+        return new Promise((resolve, reject) => {
+            db.run('INSERT INTO marks (rollNo, subject, marks) VALUES (?, ?, ?)', [marksEntries.rollNo, subject, marks], function (err) {
+                if (err) {
+                    console.error('Error adding marks:', err.message);
+                    return reject("Error adding marks.");
+                }
+                resolve();
+            });
+        });
+    });
+
+    Promise.all(insertMarksPromises)
+    .then(() => {
+        res.send("Marks added successfully.");
+    })
+    .catch(err => {
+        res.status(500).send(err);
+    });
+});
+
+// Get marks for a specific student
+app.get('/marks', (req, res) => {
+    const { rollNo } = req.query;
+
+    if (!rollNo) {
+        return res.status(400).send("Roll number is required.");
+    }
+
+    db.all('SELECT subject, marks FROM marks WHERE rollNo = ?', [rollNo], (err, rows) => {
+        if (err) {
+            console.error('Error retrieving marks:', err.message);
+            return res.status(500).send("Error retrieving marks.");
+        }
+
+        res.json(rows);
+    });
+});
+
+// Handle graceful shutdown
 process.on('SIGINT', () => {
     db.close((err) => {
         if (err) {
@@ -171,6 +220,7 @@ process.on('SIGINT', () => {
     });
 });
 
+// Start the server
 server.listen(3000, () => {
     console.log("Server listening on port 3000");
 });
