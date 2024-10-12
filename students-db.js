@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 dotenv.config();
 
@@ -18,6 +19,18 @@ const limiter = rateLimit({
     message: "Too many requests, please try again later."
 });
 
+// Load admin password from file
+let adminPassword = "welcome1234"; // Default password
+const passwordFilePath = path.join(__dirname, 'admin_password.txt');
+
+// Check if password file exists and read it
+if (fs.existsSync(passwordFilePath)) {
+    adminPassword = fs.readFileSync(passwordFilePath, 'utf8').trim();
+} else {
+    // If the file doesn't exist, create it with the default password
+    fs.writeFileSync(passwordFilePath, adminPassword);
+}
+
 const db = new sqlite3.Database(process.env.DB_PATH || './database/students.db', (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
@@ -26,17 +39,52 @@ const db = new sqlite3.Database(process.env.DB_PATH || './database/students.db',
     }
 });
 
+// Middleware setup
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
 app.use(express.static(path.join(__dirname, './public')));
 app.use(helmet());
 app.use(limiter);
 
 // Create tables if they do not exist
 db.run('CREATE TABLE IF NOT EXISTS student (sname TEXT, class TEXT, rollNo TEXT PRIMARY KEY, birthDate TEXT)');
-db.run('CREATE TABLE IF NOT EXISTS marks (rollNo TEXT, subject TEXT, marks INTEGER, FOREIGN KEY(rollNo) REFERENCES student(rollNo))');
+db.run('CREATE TABLE IF NOT EXISTS marks (rollNo TEXT, subject TEXT, marks INTEGER, PRIMARY KEY (rollNo, subject), FOREIGN KEY(rollNo) REFERENCES student(rollNo))');
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/add-student.html')); // Assuming you have this file
+// Login endpoint
+app.post('/login', (req, res) => {
+    const { password } = req.body;
+
+    if (password === adminPassword) {
+        res.json({ success: true });
+    } else {
+        res.json({ success: false, message: "Incorrect password!" });
+    }
+});
+
+// Get all students
+app.get('/students', (req, res) => {
+    const studentsByClass = {};
+
+    db.all('SELECT sname, class, rollNo, birthDate FROM student', [], (err, rows) => {
+        if (err) {
+            console.error('Error retrieving students:', err.message);
+            return res.status(500).send("Error retrieving student data.");
+        }
+
+        rows.forEach(row => {
+            if (!studentsByClass[row.class]) {
+                studentsByClass[row.class] = [];
+            }
+            studentsByClass[row.class].push({
+                sname: row.sname,
+                rollNo: row.rollNo,
+                birthDate: row.birthDate,
+                class: row.class
+            });
+        });
+
+        res.json(studentsByClass);
+    });
 });
 
 // Add student
@@ -48,14 +96,14 @@ app.post('/add', (req, res) => {
     }
 
     db.run('INSERT INTO student (sname, class, rollNo, birthDate) VALUES (?, ?, ?, ?)',
-           [sname, studentClass, rollNo, birthDate],
-           function (err) {
-               if (err) {
-                   console.error('Error inserting student:', err.message);
-                   return res.status(500).send("Error adding student.");
-               }
-               res.send(`New student added with Roll no. = ${rollNo}, Name = ${sname}, Class = ${studentClass}, Date of Birth = ${birthDate}`);
-           }
+        [sname, studentClass, rollNo, birthDate],
+        function (err) {
+            if (err) {
+                console.error('Error inserting student:', err.message);
+                return res.status(500).send("Error adding student.");
+            }
+            res.send(`New student added with Roll no. = ${rollNo}, Name = ${sname}, Class = ${studentClass}, Date of Birth = ${birthDate}`);
+        }
     );
 });
 
@@ -68,19 +116,19 @@ app.get('/view', (req, res) => {
     }
 
     db.get('SELECT rollNo AS ROLLNO, class AS CLASS, sname AS SNAME, birthDate AS BIRTHDATE FROM student WHERE rollNo = ?',
-           [rollNo],
-           (err, row) => {
-               if (err) {
-                   console.error('Error retrieving student details:', err.message);
-                   return res.status(500).send("Error retrieving student details.");
-               }
+        [rollNo],
+        (err, row) => {
+            if (err) {
+                console.error('Error retrieving student details:', err.message);
+                return res.status(500).send("Error retrieving student details.");
+            }
 
-               if (row) {
-                   res.send(`ID: ${row.ROLLNO}\nName: ${row.SNAME}\nClass: ${row.CLASS}\nDate of Birth: ${row.BIRTHDATE}`);
-               } else {
-                   res.send("No student found with the provided roll number.");
-               }
-           }
+            if (row) {
+                res.send(`ID: ${row.ROLLNO}\nName: ${row.SNAME}\nClass: ${row.CLASS}\nDate of Birth: ${row.BIRTHDATE}`);
+            } else {
+                res.send("No student found with the provided roll number.");
+            }
+        }
     );
 });
 
@@ -129,54 +177,46 @@ app.post('/delete', (req, res) => {
     });
 });
 
-// Get all students
-app.get('/students', (req, res) => {
-    const studentsByClass = {};
-
-    db.all('SELECT sname, class, rollNo, birthDate FROM student', [], (err, rows) => {
-        if (err) {
-            console.error('Error retrieving students:', err.message);
-            return res.status(500).send("Error retrieving student data.");
-        }
-
-        rows.forEach(row => {
-            if (!studentsByClass[row.class]) {
-                studentsByClass[row.class] = [];
-            }
-            studentsByClass[row.class].push({
-                sname: row.sname,
-                rollNo: row.rollNo,
-                birthDate: row.birthDate,
-                class: row.class
-            });
-        });
-
-        res.json(studentsByClass);
-    });
-});
-
 // Add marks for a student
 app.post('/add-marks', (req, res) => {
-    const marksEntries = req.body; // All marks entries from the form
+    const marksEntries = req.body;
+    const rollNo = marksEntries.rollNo;
 
-    const insertMarksPromises = Object.entries(marksEntries).map(([subject, marks]) => {
-        return new Promise((resolve, reject) => {
-            db.run('INSERT INTO marks (rollNo, subject, marks) VALUES (?, ?, ?)', [marksEntries.rollNo, subject, marks], function (err) {
-                if (err) {
-                    console.error('Error adding marks:', err.message);
-                    return reject("Error adding marks.");
-                }
-                resolve();
+    console.log('Received marks data:', marksEntries);
+
+    // First, check if the student exists
+    db.get('SELECT * FROM student WHERE rollNo = ?', [rollNo], (err, row) => {
+        if (err) {
+            console.error('Error checking student existence:', err);
+            return res.status(500).send("Error checking student record.");
+        }
+        if (!row) {
+            return res.status(400).send("No student found with the provided roll number.");
+        }
+
+        const insertMarksPromises = Object.entries(marksEntries).map(([subject, marks]) => {
+            if (subject === 'rollNo') return Promise.resolve();
+            return new Promise((resolve, reject) => {
+                db.run('INSERT INTO marks (rollNo, subject, marks) VALUES (?, ?, ?) ON CONFLICT(rollNo, subject) DO UPDATE SET marks = ?',
+                    [rollNo, subject, marks, marks],
+                    function (err) {
+                        if (err) {
+                            console.error('Error adding marks for subject:', subject, 'Error:', err.message);
+                            return reject(err);
+                        }
+                        resolve();
+                    });
             });
         });
-    });
 
-    Promise.all(insertMarksPromises)
-    .then(() => {
-        res.send("Marks added successfully.");
-    })
-    .catch(err => {
-        res.status(500).send(err);
+        Promise.all(insertMarksPromises)
+            .then(() => {
+                res.send(`Marks added successfully for roll no: ${rollNo}`);
+            })
+            .catch((err) => {
+                console.error('Error adding marks:', err.message);
+                res.status(500).send("Error adding marks.");
+            });
     });
 });
 
@@ -200,16 +240,10 @@ app.get('/marks', (req, res) => {
 
 // Get student results
 app.post('/get-result', (req, res) => {
-    const { rollNo, dob } = req.body;
+    const { rollNo } = req.body;
 
-    if (!rollNo || !dob) {
-        return res.status(400).send("Roll number and Date of Birth are required.");
-    }
-
-    const expectedPassword = dob; // Assuming the password is the DOB in DDMMYYYY format
-
-    if (dob !== expectedPassword) {
-        return res.status(400).send("Invalid Roll Number or Date of Birth.");
+    if (!rollNo) {
+        return res.status(400).send("Roll number is required.");
     }
 
     db.all('SELECT subject, marks FROM marks WHERE rollNo = ?', [rollNo], (err, rows) => {
@@ -219,43 +253,52 @@ app.post('/get-result', (req, res) => {
         }
 
         if (rows.length > 0) {
-            let resultString = `Results for Roll No: ${rollNo}<br>`;
+            // Create a simple HTML structure for the results
+            let resultHTML = `
+                <html>
+                    <head>
+                        <title>Student Results</title>
+                        <link rel="stylesheet" href="result-styles.css">
+                    </head>
+                    <body>
+                        <h1>Results for Roll No: ${rollNo}</h1>
+                        <table>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Marks</th>
+                            </tr>`;
             rows.forEach(row => {
-                resultString += `Subject: ${row.subject}, Marks: ${row.marks}<br>`;
+                resultHTML += `
+                    <tr>
+                        <td>${row.subject}</td>
+                        <td>${row.marks}</td>
+                    </tr>`;
             });
-            res.send(resultString);
+            resultHTML += `
+                        </table>
+                    </body>
+                </html>`;
+            res.send(resultHTML);
         } else {
-            res.send("No results found for the provided Roll Number.");
+            res.send("No marks found for the provided roll number.");
         }
-    });
-});
-
-// Close the database connection
-app.get('/close', (req, res) => {
-    db.close((err) => {
-        if (err) {
-            res.status(500).send('Error closing the database.');
-            console.error('Error closing the database:', err.message);
-        } else {
-            console.log('Database connection successfully closed');
-            res.send('Database connection successfully closed');
-        }
-    });
-});
-
-// Handle graceful shutdown
-process.on('SIGINT', () => {
-    db.close((err) => {
-        if (err) {
-            console.error('Error closing database:', err.message);
-        } else {
-            console.log('Database connection closed.');
-        }
-        process.exit(0);
     });
 });
 
 // Start the server
-server.listen(3000, () => {
-    console.log("Server listening on port 3000");
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
+// Existing code ...
+
+// Add this close endpoint
+app.get('/close', (req, res) => {
+    res.send("Server is shutting down...");
+    server.close(() => {
+        console.log("Server closed");
+        process.exit(0); // Exit the process
+    });
+});
+
+

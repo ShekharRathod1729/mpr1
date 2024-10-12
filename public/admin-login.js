@@ -6,11 +6,27 @@ input.addEventListener("keydown", function(event) {
     }
 });
 
-function check(form) {    
-    if(form.psw.value == "welcome1234") {
-        window.location.replace('add-student.html');
+async function check(form) {
+    const password = form.psw.value;
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.replace('add-student.html'); // Redirect on success
+        } else {
+            alert(result.message); // Show error message
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert("An error occurred. Please try again.");
     }
-    else {
-        alert("Incorrect password!");
-    }
-}   
+}

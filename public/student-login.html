@@ -1,23 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Result</title>
-    <link rel="stylesheet" href="student-login.css"> 
-</head>
-<body>
-    <h1>Check Your Result</h1>
-    <form action="/get-result" method="post">
-        <label for="rollNo">Roll Number:</label>
-        <input type="text" id="rollNo" name="rollNo" required>
-        
-        <label for="dob">Date of Birth (DDMMYYYY):</label>
-        <input type="text" id="dob" name="dob" placeholder="e.g. 12102024" required pattern="\d{8}">
-        
-        <button type="submit">Get Result</button>
-    </form>
-    <div id="error-message" style="color: red;"></div>
-    <div id="result-message"></div>
-</body>
-</html>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Student Result</title>
+            <link rel="stylesheet" href="student-login.css"> 
+        </head>
+        <body>
+            <h1>Check Your Result</h1>
+            <form action="/get-result" method="post">
+                <label for="rollNo">Roll Number:</label>
+                <input type="text" id="rollNo" name="rollNo" required>
+                
+                <label for="dob">Date of Birth (DDMMYYYY):</label>
+                <input type="text" id="dob" name="dob" placeholder="e.g. 12102024" required pattern="\d{8}">
+                
+                <button type="submit">Get Result</button>
+            </form>
+            <div id="error-message" style="color: red;"></div>
+            <div id="result-message"></div>
+        </body>
+        </html>

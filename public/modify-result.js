@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalForm = document.getElementById('modalForm');
     const modalFormFields = document.getElementById('modalFormFields');
     const modalResponse = document.getElementById('modalResponse');
+    const searchBar = document.getElementById('searchBar');
+    const searchButton = document.getElementById('searchButton');
 
     const subjects = {
         'First Year': [
@@ -38,16 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let studentsByClass = {};
+    let allStudents = [];
 
     function populateTable(students) {
         const tableBody = studentsTable.querySelector('tbody');
         if (students.length) {
             tableBody.innerHTML = students.map(student => `
-            <tr>
-                <td>${student.rollNo}</td>
-                <td>${student.sname}</td>
-                <td><button data-rollno="${student.rollNo}" class="add-modify-btn">Add/Modify</button></td>
-            </tr>
+                <tr>
+                    <td>${student.rollNo}</td>
+                    <td>${student.sname}</td>
+                    <td><button data-rollno="${student.rollNo}" class="add-modify-btn">Add/Modify</button></td>
+                </tr>
             `).join('');
         } else {
             tableBody.innerHTML = '<tr><td colspan="3">No students found</td></tr>';
@@ -55,17 +58,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showModal(rollNo) {
-        modalFormFields.innerHTML = ''; // Clear previous fields
+        modalFormFields.innerHTML = '';
         const student = Object.values(studentsByClass).flat().find(student => student.rollNo === rollNo);
 
         if (student) {
-            const studentYear = student.class; 
+            document.getElementById('studentRollNo').value = rollNo;
+            const studentYear = student.class;
             if (subjects[studentYear]) {
                 modalFormFields.innerHTML = subjects[studentYear].map(subject => `
-                <div>
-                    <label>${subject}</label>
-                    <input type="number" name="${subject}" placeholder="Enter marks" min="0" max="100">
-                </div>
+                    <div>
+                        <label>${subject}</label>
+                        <input type="number" name="${subject}" placeholder="Enter marks" min="0" max="100">
+                    </div>
                 `).join('');
             } else {
                 modalFormFields.innerHTML = '<p>Unable to determine student year.</p>';
@@ -102,27 +106,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modalForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+        console.log('Form submission attempted');
+        
         const formData = new FormData(modalForm);
-        const data = new URLSearchParams(formData).toString();
+        const data = {};
+        let rollNo;
+
+        formData.forEach((value, key) => {
+            data[key] = value;
+            console.log(`${key}: ${value}`);
+            if (key === 'rollNo') {
+                rollNo = value;
+            }
+        });
+
+        if (!rollNo) {
+            console.error('Roll number is missing');
+            alert('Error: Roll number is required');
+            return;
+        }
 
         try {
+            console.log('Sending data:', JSON.stringify(data));
             const response = await fetch('/add-marks', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: data,
+                body: JSON.stringify(data),
             });
 
+            console.log('Response received:', response.status);
             const result = await response.text();
+            console.log('Response body:', result);
+
             if (response.ok) {
                 alert("Marks have been successfully added!");
                 modalResponse.innerText = 'Marks added successfully.';
+                marksModal.style.display = 'none';
             } else {
                 alert("Error adding marks: " + result);
                 modalResponse.innerText = result;
             }
         } catch (error) {
+            console.error('Error:', error);
             alert("An unexpected error occurred: " + error.message);
             modalResponse.innerText = 'Error adding marks.';
         }
@@ -135,6 +162,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function searchStudents() {
+        const query = searchBar.value.trim().toLowerCase();
+        const filteredStudents = allStudents.filter(student => student.rollNo.toLowerCase().includes(query));
+        populateTable(filteredStudents);
+    }
+
+    searchButton.addEventListener('click', searchStudents);
+
+    // Fetch all students and populate the table
     fetch('/students')
         .then(response => {
             if (!response.ok) throw new Error('Network response was not ok');
@@ -142,11 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(data => {
             studentsByClass = data;
-            const students = [];
+            allStudents = [];
             Object.values(studentsByClass).forEach(classStudents => {
-                students.push(...classStudents);
+                allStudents.push(...classStudents);
             });
-            populateTable(students);
+            populateTable(allStudents);
         })
         .catch(error => {
             console.error('Error fetching students:', error);
