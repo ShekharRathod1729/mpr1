@@ -1,28 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Student Login</title>
-        <link rel="stylesheet" href="student-login.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link r el="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Tint&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
-    </head>
-    <body>
-        <h1> STUDENT LOGIN </h1>
-        <form action="action_page.php" method="post">
-            <div class="container">
-                <label for="uname"><b>Enter your Roll ID: </b></label>
-                <input type="text" placeholder="Enter Roll ID" name="uname" required>
-                <label for="psw"><b>Password</b></label>
-                <input type="password" placeholder="Enter Password" name="psw" required>
-                <button type="submit">Login</button>
-            </div>
-            <div class="container" style="background-color:#f1f1f1">
-                <button type="button" class="cancelbtn"><a href="index.html">Cancel</a></button>
-            </div>
-        </form>        
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Result</title>
+    <link rel="stylesheet" href="student-login.css"> 
+</head>
+<body>
+    <h1>Check Your Result</h1>
+    <form action="/get-result" method="post">
+        <label for="rollNo">Roll Number:</label>
+        <input type="text" id="rollNo" name="rollNo" required>
+        
+        <label for="dob">Date of Birth (DDMMYYYY):</label>
+        <input type="text" id="dob" name="dob" placeholder="e.g. 12102024" required pattern="\d{8}">
+        
+        <button type="submit">Get Result</button>
+    </form>
+    <div id="error-message" style="color: red;"></div>
+    <div id="result-message"></div>
+</body>
 </html>

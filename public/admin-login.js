@@ -8,7 +8,7 @@ input.addEventListener("keydown", function(event) {
 
 function check(form) {    
     if(form.psw.value == "welcome1234") {
-        window.location.replace('admin.html');
+        window.location.replace('add-student.html');
     }
     else {
         alert("Incorrect password!");

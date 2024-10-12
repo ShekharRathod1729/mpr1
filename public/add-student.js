@@ -185,4 +185,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial fetch to display students on page load
     fetchStudents();
-});
+}); 

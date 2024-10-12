@@ -5,6 +5,9 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -15,7 +18,7 @@ const limiter = rateLimit({
     message: "Too many requests, please try again later."
 });
 
-const db = new sqlite3.Database('./database/students.db', (err) => {
+const db = new sqlite3.Database(process.env.DB_PATH || './database/students.db', (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
     } else {
@@ -33,7 +36,7 @@ db.run('CREATE TABLE IF NOT EXISTS student (sname TEXT, class TEXT, rollNo TEXT 
 db.run('CREATE TABLE IF NOT EXISTS marks (rollNo TEXT, subject TEXT, marks INTEGER, FOREIGN KEY(rollNo) REFERENCES student(rollNo))');
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/add-student.html'));
+    res.sendFile(path.join(__dirname, './public/add-student.html')); // Assuming you have this file
 });
 
 // Add student
@@ -126,19 +129,6 @@ app.post('/delete', (req, res) => {
     });
 });
 
-// Close the database connection
-app.get('/close', (req, res) => {
-    db.close((err) => {
-        if (err) {
-            res.status(500).send('Error closing the database.');
-            console.error('Error closing the database:', err.message);
-        } else {
-            console.log('Database connection successfully closed');
-            res.send('Database connection successfully closed');
-        }
-    });
-});
-
 // Get all students
 app.get('/students', (req, res) => {
     const studentsByClass = {};
@@ -157,7 +147,7 @@ app.get('/students', (req, res) => {
                 sname: row.sname,
                 rollNo: row.rollNo,
                 birthDate: row.birthDate,
-                class: row.class // Include the class property
+                class: row.class
             });
         });
 
@@ -205,6 +195,51 @@ app.get('/marks', (req, res) => {
         }
 
         res.json(rows);
+    });
+});
+
+// Get student results
+app.post('/get-result', (req, res) => {
+    const { rollNo, dob } = req.body;
+
+    if (!rollNo || !dob) {
+        return res.status(400).send("Roll number and Date of Birth are required.");
+    }
+
+    const expectedPassword = dob; // Assuming the password is the DOB in DDMMYYYY format
+
+    if (dob !== expectedPassword) {
+        return res.status(400).send("Invalid Roll Number or Date of Birth.");
+    }
+
+    db.all('SELECT subject, marks FROM marks WHERE rollNo = ?', [rollNo], (err, rows) => {
+        if (err) {
+            console.error('Error retrieving marks:', err.message);
+            return res.status(500).send("Error retrieving results.");
+        }
+
+        if (rows.length > 0) {
+            let resultString = `Results for Roll No: ${rollNo}<br>`;
+            rows.forEach(row => {
+                resultString += `Subject: ${row.subject}, Marks: ${row.marks}<br>`;
+            });
+            res.send(resultString);
+        } else {
+            res.send("No results found for the provided Roll Number.");
+        }
+    });
+});
+
+// Close the database connection
+app.get('/close', (req, res) => {
+    db.close((err) => {
+        if (err) {
+            res.status(500).send('Error closing the database.');
+            console.error('Error closing the database:', err.message);
+        } else {
+            console.log('Database connection successfully closed');
+            res.send('Database connection successfully closed');
+        }
     });
 });
 
